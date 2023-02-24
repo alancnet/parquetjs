@@ -17,6 +17,7 @@ function mkTestSchema(opts) {
     name: { type: 'UTF8', compression: opts.compression },
     //quantity:   { type: 'INT64', encoding: 'RLE', typeLength: 6, optional: true, compression: opts.compression }, // parquet-mr actually doesnt support this
     quantity: { type: 'INT64', optional: true, compression: opts.compression },
+    bigint: { type: 'BIGINT', optional: true, compression: opts.compression },
     price: { type: 'DOUBLE', compression: opts.compression },
     date: { type: 'TIMESTAMP_MICROS', compression: opts.compression },
     day: { type: 'DATE', compression: opts.compression },
@@ -41,6 +42,7 @@ function mkTestRows(opts) {
     rows.push({
       name: 'apples',
       quantity: 10n,
+      bigint: BigInt(Number.MAX_SAFE_INTEGER) + 2n,
       price: 2.6,
       day: new Date('2017-11-26'),
       date: new Date(TEST_VTIME + 1000 * i),
@@ -197,7 +199,7 @@ async function readTestFile() {
   assert.deepEqual(reader.getMetadata(), { "myuid": "420", "fnord": "dronf" })
 
   let schema = reader.getSchema();
-  assert.equal(schema.fieldList.length, 12);
+  assert.equal(schema.fieldList.length, 13);
   assert(schema.fields.name);
   assert(schema.fields.stock);
   assert(schema.fields.stock.fields.quantity);
@@ -285,6 +287,7 @@ async function readTestFile() {
       assert.deepEqual(await cursor.next(), {
         name: 'apples',
         quantity: 10n,
+        bigint: BigInt(Number.MAX_SAFE_INTEGER) + 2n,
         price: 2.6,
         day: new Date('2017-11-26'),
         date: new Date(TEST_VTIME + 1000 * i),

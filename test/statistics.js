@@ -8,6 +8,7 @@ const schema = new parquet.ParquetSchema({
   name: { type: 'UTF8' },
   //quantity:   { type: 'INT64', encoding: 'RLE', typeLength: 6, optional: true }, // parquet-mr actually doesnt support this
   quantity: { type: 'INT64', optional: true },
+  bigint: { type: 'BIGINT', optional: true },
   price: { type: 'DOUBLE' },
   date: { type: 'TIMESTAMP_MICROS' },
   day: { type: 'DATE' },
@@ -24,6 +25,7 @@ const schema = new parquet.ParquetSchema({
   meta_json: { type: 'BSON', optional: true, statistics: false },
 });
 
+const TEST_BIGINT = BigInt(Number.MAX_SAFE_INTEGER) + 2n;
 
 describe('statistics', async function () {
   let reader, row;
@@ -34,6 +36,7 @@ describe('statistics', async function () {
     writer.appendRow({
       name: 'apples',
       quantity: 10n,
+      bigint: TEST_BIGINT,
       price: 2.6,
       day: new Date('2017-11-26'),
       date: new Date(TEST_VTIME + 1000),
@@ -99,43 +102,43 @@ describe('statistics', async function () {
 
     assert.equal(rowStats('name').min_value, 'apples');
     assert.equal(rowStats('name').max_value, 'oranges');
-    assert.equal(+rowStats('name').distinct_count, 4);
-    assert.equal(+rowStats('name').null_count, 0);
+    assert.equal(Number(rowStats('name').distinct_count), 4n);
+    assert.equal(Number(rowStats('name').null_count), 0n);
 
     assert.equal(rowStats('quantity').min_value, 10);
     assert.equal(rowStats('quantity').max_value, 20);
-    assert.equal(+rowStats('quantity').distinct_count, 3);
-    assert.equal(+rowStats('quantity').null_count, 1);
+    assert.equal(Number(rowStats('quantity').distinct_count), 3n);
+    assert.equal(Number(rowStats('quantity').null_count), 1n);
 
     assert.equal(rowStats('price').min_value, 2.6);
     assert.equal(rowStats('price').max_value, 4.2);
-    assert.equal(+rowStats('price').distinct_count, 4);
-    assert.equal(+rowStats('price').null_count, 0);
+    assert.equal(Number(rowStats('price').distinct_count), 4n);
+    assert.equal(Number(rowStats('price').null_count), 0n);
 
     assert.deepEqual(rowStats('day').min_value, new Date('2008-11-26'));
     assert.deepEqual(rowStats('day').max_value, new Date('2018-03-03'));
-    assert.equal(+rowStats('day').distinct_count, 4);
-    assert.equal(+rowStats('day').null_count, 0);
+    assert.equal(Number(rowStats('day').distinct_count), 4n);
+    assert.equal(Number(rowStats('day').null_count), 0n);
 
     assert.deepEqual(rowStats('finger').min_value, 'ABCDE');
     assert.deepEqual(rowStats('finger').max_value, 'XCVBN');
-    assert.equal(+rowStats('finger').distinct_count, 3);
-    assert.equal(+rowStats('finger').null_count, 0);
+    assert.equal(Number(rowStats('finger').distinct_count), 3n);
+    assert.equal(Number(rowStats('finger').null_count), 0n);
 
     assert.deepEqual(rowStats('stock,quantity').min_value, 10n);
     assert.deepEqual(rowStats('stock,quantity').max_value, 50n);
-    assert.equal(+rowStats('stock,quantity').distinct_count, 9n);
-    assert.equal(+rowStats('stock,quantity').null_count, 1n);
+    assert.equal(Number(rowStats('stock,quantity').distinct_count), 9n);
+    assert.equal(Number(rowStats('stock,quantity').null_count), 1n);
 
     assert.deepEqual(rowStats('stock,warehouse').min_value, 'A');
     assert.deepEqual(rowStats('stock,warehouse').max_value, 'x');
-    assert.equal(+rowStats('stock,warehouse').distinct_count, 5);
-    assert.equal(+rowStats('stock,warehouse').null_count, 1);
+    assert.equal(Number(rowStats('stock,warehouse').distinct_count), 5n);
+    assert.equal(Number(rowStats('stock,warehouse').null_count), 1n);
 
     assert.deepEqual(rowStats('colour').min_value, 'brown');
     assert.deepEqual(rowStats('colour').max_value, 'yellow');
-    assert.equal(+rowStats('colour').distinct_count, 5);
-    assert.equal(+rowStats('colour').null_count, 0);
+    assert.equal(Number(rowStats('colour').distinct_count), 5n);
+    assert.equal(Number(rowStats('colour').null_count), 0n);
 
     assert.equal(rowStats('inter'), null);
     assert.equal(rowStats('meta_json'), null);

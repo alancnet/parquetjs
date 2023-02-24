@@ -48,6 +48,7 @@ is a simple example that shows how to instantiate a `ParquetSchema` object:
 var schema = new parquet.ParquetSchema({
   name: { type: 'UTF8' },
   quantity: { type: 'INT64' },
+  bigint: { type: 'BIGINT' }, // To utilize BigInt instead of node-int64
   price: { type: 'DOUBLE' },
   date: { type: 'TIMESTAMP_MILLIS' },
   in_stock: { type: 'BOOLEAN' }
